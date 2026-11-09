@@ -1,0 +1,7 @@
+{
+ "results/runs/moracheck_s0/last.pt": {
+  "auc_resynth_vs_orig": 0.538340625,
+  "mean_max_orig": 0.31285344433243156,
+  "mean_max_resynth": 0.33988078294263685
+ }
+}

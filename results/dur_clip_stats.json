@@ -1,0 +1,22 @@
+{
+ "long_short": {
+  "n": 2717,
+  "lower": 1118,
+  "upper": 123
+ },
+ "gem_drop": {
+  "n": 1190,
+  "lower": 0,
+  "upper": 312
+ },
+ "gem_add": {
+  "n": 3062,
+  "lower": 1248,
+  "upper": 198
+ },
+ "short_long": {
+  "n": 2889,
+  "lower": 496,
+  "upper": 115
+ }
+}
