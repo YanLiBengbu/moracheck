@@ -1,0 +1,15 @@
+# Python 3.12; install PyTorch 2.7.1 with CUDA 12.8 from https://download.pytorch.org/whl/cu128 first
+torch==2.7.1
+torchaudio==2.7.1
+transformers==4.57.1
+huggingface-hub==0.36.2
+numpy==2.5.4
+scipy==1.18.1
+scikit-learn==1.9.1
+pandas==3.1.1
+soundfile==0.14.0
+librosa==1.0.0
+praat-parselmouth==0.4.7
+pyopenjtalk-plus==0.4.1.post10
+kokoro==0.9.4
+misaki==0.9.4

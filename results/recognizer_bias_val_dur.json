@@ -1,0 +1,31 @@
+{
+ "none": {
+  "canonical": 259,
+  "other": 335
+ },
+ "short_long": {
+  "other": 123,
+  "canonical": 71,
+  "realized": 7
+ },
+ "nas_drop": {
+  "canonical": 48,
+  "other": 88,
+  "realized": 3
+ },
+ "gem_add": {
+  "other": 128,
+  "canonical": 72,
+  "realized": 4
+ },
+ "long_short": {
+  "canonical": 30,
+  "other": 119,
+  "realized": 33
+ },
+ "gem_drop": {
+  "realized": 4,
+  "canonical": 24,
+  "other": 48
+ }
+}

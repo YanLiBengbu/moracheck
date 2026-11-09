@@ -1,0 +1,15 @@
+# One training run per line. Lines starting with v2 run scripts/train_v2.py (MoraCheck);
+# the others run scripts/train_detector.py (cross-attention detector).
+--name crossattn_baseenc_s0 --encoder models/japanese-hubert-base --sources flip,dur,tts --seed 0
+--name crossattn_s0 --encoder models/japanese-hubert-base-phoneme-ctc-v4 --sources flip,dur,tts --seed 0
+v2 --name moracheck_s0 --sources flip,dur,tts --seed 0
+v2 --name moracheck_s1 --sources flip,dur,tts --seed 1
+v2 --name moracheck_s2 --sources flip,dur,tts --seed 2
+v2 --name abl_no_lr_s0 --sources flip,dur,tts --seed 0 --no_lr
+v2 --name abl_no_dur_s0 --sources flip,dur,tts --seed 0 --no_dur
+v2 --name abl_no_seg_s0 --sources flip,dur,tts --seed 0 --no_seg
+v2 --name abl_no_xattn_s0 --sources flip,dur,tts --seed 0 --no_xattn
+v2 --name abl_flip_only_s0 --sources flip --seed 0
+v2 --name abl_no_tts_s0 --sources flip,dur --seed 0
+v2 --name abl_no_dur_edits_s0 --sources flip,tts --seed 0
+v2 --name abl_no_flips_s0 --sources dur,tts --seed 0
