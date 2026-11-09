@@ -94,6 +94,7 @@ def main():
     ap.add_argument("--native", default="data/native_clean.jsonl")
     ap.add_argument("--sim_dir", default="data/sim")
     ap.add_argument("--gpu_gb", type=float, default=5.5)
+    ap.add_argument("--dur_file", default="dur_train.jsonl")
     for f in ["lr", "dur", "seg", "xattn"]:
         ap.add_argument(f"--no_{f}", action="store_true")
     a = ap.parse_args()
@@ -105,7 +106,7 @@ def main():
     json.dump(vars(a), open(f"{out_dir}/args.json", "w"), indent=1)
     native = [it for it in load_jsonl(a.native) if it["split"] == "train" and it["dur"] <= a.max_sec]
     srcs = a.sources.split(",")
-    dur = load_jsonl(f"{a.sim_dir}/dur_train.jsonl") if "dur" in srcs else None
+    dur = load_jsonl(f"{a.sim_dir}/{a.dur_file}") if "dur" in srcs else None
     tts = load_jsonl(f"{a.sim_dir}/tts_train.jsonl") if "tts" in srcs else None
     w = {s: 1.0 for s in srcs}
     if a.src_w:

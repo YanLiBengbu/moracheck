@@ -79,10 +79,43 @@ def score_lr(ctc, lp, C):
     return [best.get(midx[k], -10.0) for k in range(len(C))]
 
 
-METHODS = {"gop": score_gop, "rec": score_rec, "lr": score_lr}
+_DUR = None
 
 
-def run(items, methods=("gop", "rec", "lr"), device="cuda"):
+def score_dur(ctc, lp, C):
+    """Duration rule: z-score of the aligned, rate-normalized duration against native
+    statistics; long for a short vowel, short for a long vowel, geminate or moraic nasal."""
+    global _DUR
+    if _DUR is None:
+        _DUR = json.load(open("results/native_dur_stats.json"))
+    res = ctc.align(lp, C)
+    if res is None:
+        return [0.0] * len(C)
+    spans, _ = res
+    d = [max(b - a, 1) for a, b in spans]
+    nm = sum(1 for p in C if p in "aiueo" or p in ("N", "cl"))
+    mu = sum(d) / max(nm, 1)
+    z = lambda v, k: (np.log(v / mu) - _DUR[k][0]) / _DUR[k][1]
+    sc = [0.0] * len(C)
+    for i, p in enumerate(C):
+        if p in "aiueo":
+            if i + 1 < len(C) and C[i + 1] == p:
+                sc[i] = sc[i + 1] = -z(d[i] + d[i + 1], "long_v")
+            elif i == 0 or C[i - 1] != p:
+                sc[i] = z(d[i], "short_v")
+        elif p in ("cl", "N"):
+            sc[i] = -z(d[i], p)
+    midx = mora_of_phone(C)
+    best = {}
+    for k, v in enumerate(sc):
+        best[midx[k]] = max(best.get(midx[k], -1e9), v)
+    return [best[midx[k]] for k in range(len(C))]
+
+
+METHODS = {"gop": score_gop, "rec": score_rec, "lr": score_lr, "dur": score_dur}
+
+
+def run(items, methods=("gop", "rec", "lr", "dur"), device="cuda"):
     ctc = CTC(device)
     out = {m: [] for m in methods}
     for it in items:
@@ -100,14 +133,22 @@ if __name__ == "__main__":
     device = os.environ.get("DEVICE", "cuda")
     if device == "cpu":
         torch.set_num_threads(3)
+    methods = tuple(os.environ.get("METHODS", "gop,rec,lr,dur").split(","))
     for p in sys.argv[1:]:
         items = [json.loads(l) for l in open(p, encoding="utf-8")]
-        res = run(items, device=device)
+        res = run(items, methods=methods, device=device)
+        old = p.replace(".jsonl", ".baselines.json")
+        if os.path.exists(old):
+            prev = json.load(open(old))
+            prev.update({m: v for m, v in res.items()})
+            res_all = prev
+        else:
+            res_all = res
         for m, probs in res.items():
             y_u = [int(max(it["labels"]) > 0) for it in items]
             s_u = [max(s) for s in probs]
             y_p = [l for it in items for l in it["labels"]]
             s_p = [x for s in probs for x in s]
             print(f"{p} {m}: utt AUC {roc_auc_score(y_u, s_u):.4f}  phone AUC {roc_auc_score(y_p, s_p):.4f}", flush=True)
-        res = {m: [[float(v) for v in sc] for sc in probs] for m, probs in res.items()}
-        json.dump(res, open(p.replace(".jsonl", ".baselines.json"), "w"))
+        res_all = {m: [[float(v) for v in sc] for sc in probs] for m, probs in res_all.items()}
+        json.dump(res_all, open(p.replace(".jsonl", ".baselines.json"), "w"))

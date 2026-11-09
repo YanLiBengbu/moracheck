@@ -101,6 +101,10 @@ def mora_dur(ph, spans):
     return (spans[-1][1] - spans[0][0]) * FR / max(n, 1)
 
 
+# control condition without calibration: fixed factors around one half and two
+FIXED = os.environ.get("DUR_MODE", "calibrated") == "fixed"
+
+
 def edit(x, ph, spans, etype, i, rng, tv):
     """Returns (y, C, labels, R, factor). C is the native phones (the correct target)."""
     sec = lambda f: f * FR
@@ -141,6 +145,8 @@ def edit(x, ph, spans, etype, i, rng, tv):
     max_len = 0.3 if etype.startswith("gem") else 0.6
     if reg is None or reg[1] - reg[0] < 0.02 or reg[1] - reg[0] > max_len:
         return None
+    if FIXED and etype != "nas_drop":
+        f = rng.uniform(0.45, 0.55) if etype in ("long_short", "gem_drop") else rng.uniform(1.8, 2.2)
     # learners who drop a geminate lengthen the following CV, and learners who add one
     # shorten the preceding CV (Yamakawa et al., 2021)
     extra = []
