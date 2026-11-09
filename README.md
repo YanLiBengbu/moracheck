@@ -29,6 +29,24 @@ Utterance AUC on 1,864 Common Voice speakers not seen in training. MoraCheck is 
 The TTS swaps were verified by the same recognizer that the baselines use, which favors the likelihood ratio on that set.
 Per-type results, the recognizer outputs on duration edits and the ablations are in `results/`.
 
+## Ablation
+
+Utterance AUC, seed 0, 12,000 steps each.
+
+| Variant | Flips | Lexical flips | Duration edits | TTS swaps |
+|---|---|---|---|---|
+| MoraCheck (seed 0) | 0.966 | 0.954 | 0.825 | 0.993 |
+| without likelihood ratios | 0.954 | 0.939 | 0.814 | 0.988 |
+| without durations | 0.965 | 0.952 | 0.819 | 0.992 |
+| without segment features | 0.966 | 0.966 | 0.750 | 0.975 |
+| without cross-attention | 0.962 | 0.949 | 0.823 | 0.992 |
+| text flips only | 0.983 | 0.980 | 0.630 | 0.842 |
+| without TTS swaps | 0.970 | 0.959 | 0.834 | 0.824 |
+| without duration edits | 0.980 | 0.977 | 0.644 | 0.994 |
+| without text flips | 0.799 | 0.776 | 0.789 | 0.979 |
+
+Each simulator is needed for its own error kind, and the segment features carry the duration errors.
+
 ## Installation
 
 ```bash
