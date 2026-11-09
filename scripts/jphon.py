@@ -23,7 +23,7 @@ PHONE2ID = {p: i for i, p in enumerate(PHONES)}
 # error types used everywhere in the paper
 ERROR_TYPES = ["voicing", "devoicing", "long_short", "short_long", "gem_drop", "gem_add",
                "nas_drop", "nas_add", "pal_merge", "pal_split", "tsu", "zj", "rd"]
-# coarse groups that match the teaching categories in UME-JRF
+# coarse groups that follow the contrasts of Japanese pronunciation teaching
 GROUP = {"voicing": "voicing", "devoicing": "voicing",
          "long_short": "long vowel", "short_long": "long vowel",
          "gem_drop": "geminate", "gem_add": "geminate",

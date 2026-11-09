@@ -1,6 +1,6 @@
 """Ablation table of MoraCheck on the native validation sets, from the training logs.
 
-Each row is the checkpoint with the highest mean utterance AUC of one run (seed 0). The full
+Each row is the checkpoint after the last step of one run (seed 0). The full
 model row is the seed-0 run, so every row has the same seed and training budget.
 Prints LaTeX rows and writes results/ablation_summary.json.
 """
@@ -25,7 +25,7 @@ def best(run):
     if not (ROOT / f"results/runs/{run}/done.json").exists():
         return None
     lines = [l for l in open(p) if l.startswith("EVAL")]
-    b = max(lines, key=lambda l: float(re.search(r"mean_utt=([0-9.]+)", l).group(1)))
+    b = lines[-1]  # the checkpoint after the last step; no selection on the reported sets
     return {k: float(v) for k, v in re.findall(r"(\w+):utt=([0-9.]+)", b)}
 
 

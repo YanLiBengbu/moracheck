@@ -9,6 +9,9 @@ Steps
   3. on test speakers: AUC with speaker-cluster bootstrap intervals, paired differences to
      MoraCheck, Cohen's kappa of each method and of each teacher with the majority of the
      other teachers, AUC per group and per first language
+Label rule (fixed before the data arrived): the label is the majority of the teachers; items
+with a 2 to 2 tie among four teachers are left out of the main AUC, and a sensitivity run
+counts ties as mispronounced (build the items file with label_ties=1).
 Usage: umejrf_analyze.py SCORED.json ITEMS.jsonl OUT.json [--ref KEY]
 """
 import argparse, json, random
@@ -71,25 +74,37 @@ def main():
         row["per_l1"] = {l: float(roc_auc_score(y[te & (l1 == l)], s[te & (l1 == l)]))
                          for l in sorted(set(l1)) if 0 < y[te & (l1 == l)].sum() < (te & (l1 == l)).sum()}
         out["methods"][k] = row
-    # each teacher against the majority of the other teachers, on test items rated by at least three
+    # like-for-like agreement: hold out one teacher at a time; the held-out teacher and each
+    # method are both compared with the majority of the remaining teachers (no ties with three)
     rat = [it.get("ratings") for it in items]
-    kap = defaultdict(lambda: ([], []))
+    tk, mk = defaultdict(lambda: ([], [])), {k: defaultdict(lambda: ([], [])) for k in scores}
+    thr = {k: out["methods"][k]["threshold"] for k in scores}
     for i in np.where(te)[0]:
         rs = rat[i]
-        if not rs or len(rs) < 3:
+        if not rs or len(rs) < 4:
             continue
         for j, v in enumerate(rs):
             others = [x for t, x in enumerate(rs) if t != j]
-            maj = int(sum(others) * 2 > len(others)) if sum(others) * 2 != len(others) else None
-            if maj is not None:
-                kap[j][0].append(v); kap[j][1].append(maj)
-    out["teacher_kappa"] = {str(j): float(cohen_kappa_score(a_, b_)) for j, (a_, b_) in kap.items() if len(set(a_)) > 1}
-    if out["teacher_kappa"]:
-        out["teacher_kappa_mean"] = float(np.mean(list(out["teacher_kappa"].values())))
+            if sum(others) * 2 == len(others):
+                continue
+            maj = int(sum(others) * 2 > len(others))
+            tk[j][0].append(v); tk[j][1].append(maj)
+            for k, sc in scores.items():
+                mk[k][j][0].append(int(sc[i] >= thr[k])); mk[k][j][1].append(maj)
+    kap = lambda a_, b_: float(cohen_kappa_score(a_, b_)) if len(set(a_)) > 1 and len(set(b_)) > 1 else None
+    out["teacher_kappa"] = {str(j): kap(*v) for j, v in tk.items()}
+    vals = [v for v in out["teacher_kappa"].values() if v is not None]
+    out["teacher_kappa_mean"] = float(np.mean(vals)) if vals else None
+    for k in scores:
+        mv = [kap(*v) for v in mk[k].values()]
+        mv = [v for v in mv if v is not None]
+        out["methods"][k]["kappa_heldout_mean"] = float(np.mean(mv)) if mv else None
     json.dump(out, open(a.out, "w"), indent=1)
     for k, row in out["methods"].items():
         print(f"{k:45s} AUC {row['auc']:.3f} [{row['ci'][0]:.3f}, {row['ci'][1]:.3f}] kappa {row['kappa']:.3f}")
-    print("teacher kappa", out.get("teacher_kappa_mean"))
+    print("teacher kappa (held-out mean)", out.get("teacher_kappa_mean"))
+    for k, row in out["methods"].items():
+        print(f"{k:45s} kappa vs held-out majority {row.get('kappa_heldout_mean')}")
 
 
 if __name__ == "__main__":
