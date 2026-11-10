@@ -45,7 +45,7 @@ Utterance AUC, seed 0, 12,000 steps each.
 | without duration edits | 0.980 | 0.977 | 0.644 | 0.994 |
 | without text flips | 0.799 | 0.776 | 0.789 | 0.979 |
 
-Each simulator is needed for its own error kind, and the segment features carry the duration errors.
+Each simulator is needed for its own error kind, and the segment features carry the duration errors. Over three seeds, duration-edit AUC was 0.736 without segment features and 0.645 without duration edits, and flip AUC was 0.722 without text flips (`results/seed_summary.json`). A control with fixed duration factors near 0.5 and 2.0 instead of calibrated targets reached 0.805 on duration edits.
 
 ## Installation
 

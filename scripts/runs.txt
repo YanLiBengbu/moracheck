@@ -13,3 +13,12 @@ v2 --name abl_flip_only_s0 --sources flip --seed 0
 v2 --name abl_no_tts_s0 --sources flip,dur --seed 0
 v2 --name abl_no_dur_edits_s0 --sources flip,tts --seed 0
 v2 --name abl_no_flips_s0 --sources dur,tts --seed 0
+v2 --name ctl_fixed_dur_s0 --sources flip,dur,tts --seed 0 --dur_file dur_train_fixed.jsonl
+v2 --name abl_no_seg_s1 --sources flip,dur,tts --seed 1 --no_seg
+v2 --name abl_no_dur_edits_s1 --sources flip,tts --seed 1
+v2 --name abl_no_flips_s1 --sources dur,tts --seed 1
+v2 --name ctl_fixed_dur_s1 --sources flip,dur,tts --seed 1 --dur_file dur_train_fixed.jsonl
+v2 --name abl_no_seg_s2 --sources flip,dur,tts --seed 2 --no_seg
+v2 --name abl_no_dur_edits_s2 --sources flip,tts --seed 2
+v2 --name abl_no_flips_s2 --sources dur,tts --seed 2
+v2 --name ctl_fixed_dur_s2 --sources flip,dur,tts --seed 2 --dur_file dur_train_fixed.jsonl
