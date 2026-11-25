@@ -9,14 +9,20 @@ Steps
   3. on test speakers: AUC with speaker-cluster bootstrap intervals, paired differences to
      MoraCheck, Cohen's kappa of each method and of each teacher with the majority of the
      other teachers, AUC per group and per first language
+  4. native control: share of native target words at or above each method's development threshold
+  5. D set (optional): Spearman correlation between the mean rating and the word score, test speakers
 Label rule (fixed before the data arrived): the label is the majority of the teachers; items
 with a 2 to 2 tie among four teachers are left out of the main AUC, and a sensitivity run
 counts ties as mispronounced (build the items file with label_ties=1).
-Usage: umejrf_analyze.py SCORED.json ITEMS.jsonl OUT.json [--ref KEY]
+Group and first-language AUCs need at least 30 positive and 30 negative test items.
+With --summary, the headline numbers for Fig. 1 and the video go to a small JSON
+(results/umejrf_summary.json in the real run).
+Usage: umejrf_analyze.py SCORED.json ITEMS.jsonl OUT.json [--ref KEY] [--dset SCORED_D.json] [--summary PATH]
 """
 import argparse, json, random
 from collections import defaultdict
 import numpy as np
+from scipy.stats import spearmanr
 from sklearn.metrics import roc_auc_score, roc_curve, cohen_kappa_score
 
 from stats import cluster_boot
@@ -43,18 +49,21 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("scored"); ap.add_argument("items"); ap.add_argument("out")
     ap.add_argument("--ref", default=None)
+    ap.add_argument("--dset", default=None)
+    ap.add_argument("--summary", default=None)
     a = ap.parse_args()
     r = json.load(open(a.scored))
     items = [json.loads(l) for l in open(a.items, encoding="utf-8")]
     y = np.array(r["label"]); spk = np.array([str(s) for s in r["spk"]]); l1 = np.array([str(x) for x in r["l1"]])
     grp = np.array([str(g) for g in r["group"]])
     scores = {k: np.array(v) for k, v in r["scores"].items()}
-    ref = a.ref or next(k for k in scores if "best.pt" in k)
-    dev = split_speakers(spk, l1)
-    is_dev = np.array([s in dev for s in spk])
-    te = ~is_dev
-    out = dict(n_items=int(len(y)), n_speakers=int(len(set(spk))), n_dev_speakers=len(dev),
-               n_test_items=int(te.sum()), test_positive_rate=float(y[te].mean()))
+    ref = a.ref or ("moracheck" if "moracheck" in scores else next(k for k in scores if "last.pt" in k))
+    nat = np.array(r.get("native") or [0] * len(y)).astype(bool)
+    dev = split_speakers(spk[~nat], l1[~nat])
+    is_dev = np.array([s in dev for s in spk]) & ~nat
+    te = ~is_dev & ~nat
+    out = dict(ref=ref, n_items=int((~nat).sum()), n_speakers=int(len(set(spk[~nat]))), n_dev_speakers=len(dev),
+               n_test_items=int(te.sum()), test_positive_rate=float(y[te].mean()), n_native_items=int(nat.sum()))
     # learner-informed group distribution from development speakers
     out["dev_group_error_rate"] = {g: float(y[is_dev & (grp == g)].mean()) for g in sorted(set(grp)) if (is_dev & (grp == g)).any()}
     # thresholds on development speakers, kappa on test speakers
@@ -69,10 +78,13 @@ def main():
             diff = d[ref] - d[k]
             row["diff_to_ref"] = float(roc_auc_score(y[te], scores[ref][te]) - auc)
             row["diff_ci"] = [float(x) for x in np.percentile(diff, [2.5, 97.5])]
+        enough = lambda m: y[m].sum() >= 30 and (1 - y[m]).sum() >= 30
         row["per_group"] = {g: float(roc_auc_score(y[te & (grp == g)], s[te & (grp == g)]))
-                            for g in sorted(set(grp)) if 0 < y[te & (grp == g)].sum() < (te & (grp == g)).sum()}
+                            for g in sorted(set(grp[te])) if enough(te & (grp == g))}
         row["per_l1"] = {l: float(roc_auc_score(y[te & (l1 == l)], s[te & (l1 == l)]))
-                         for l in sorted(set(l1)) if 0 < y[te & (l1 == l)].sum() < (te & (l1 == l)).sum()}
+                         for l in sorted(set(l1[te])) if enough(te & (l1 == l))}
+        if nat.any():
+            row["native_false_alarm"] = float((s[nat] >= thr).mean())
         out["methods"][k] = row
     # like-for-like agreement: hold out one teacher at a time; the held-out teacher and each
     # method are both compared with the majority of the remaining teachers (no ties with three)
@@ -99,7 +111,25 @@ def main():
         mv = [kap(*v) for v in mk[k].values()]
         mv = [v for v in mv if v is not None]
         out["methods"][k]["kappa_heldout_mean"] = float(np.mean(mv)) if mv else None
+    if a.dset:
+        rd = json.load(open(a.dset))
+        dspk = np.array([str(x) for x in rd["spk"]])
+        dnat = np.array(rd.get("native") or [0] * len(dspk)).astype(bool)
+        dte = np.array([x not in dev for x in dspk]) & ~dnat
+        rm = np.array([np.nan if v is None else v for v in rd["rating_mean"]], dtype=float)
+        ok = dte & ~np.isnan(rm)
+        out["dset"] = {"n_test_words": int(ok.sum())}
+        for k, v in rd["scores"].items():
+            rho, pv = spearmanr(rm[ok], np.array(v)[ok])
+            out["dset"][k] = dict(spearman=float(rho), p=float(pv))
     json.dump(out, open(a.out, "w"), indent=1)
+    if a.summary:
+        m = out["methods"]
+        json.dump(dict(moracheck=m[ref]["auc"], moracheck_ci=m[ref]["ci"], lr=m["lr"]["auc"], gop=m["gop"]["auc"],
+                       lr_diff_ci=m["lr"]["diff_ci"], kappa_model=m[ref]["kappa_heldout_mean"],
+                       kappa_teacher=out["teacher_kappa_mean"], native_false_alarm=m[ref].get("native_false_alarm"),
+                       n_test_items=out["n_test_items"], n_speakers=out["n_speakers"]),
+                  open(a.summary, "w"), indent=1)
     for k, row in out["methods"].items():
         print(f"{k:45s} AUC {row['auc']:.3f} [{row['ci'][0]:.3f}, {row['ci'][1]:.3f}] kappa {row['kappa']:.3f}")
     print("teacher kappa (held-out mean)", out.get("teacher_kappa_mean"))

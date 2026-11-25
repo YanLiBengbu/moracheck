@@ -1,0 +1,485 @@
+{
+ "n_clips": 60,
+ "listeners": {
+  "native_listener": {
+   "edits_perceived": 22,
+   "n_edits": 40,
+   "rate": 0.55,
+   "ci": [
+    0.398,
+    0.693
+   ],
+   "p_vs_chance": 0.3179140013144206,
+   "controls_canonical": 19,
+   "n_controls": 20,
+   "accuracy": 0.683,
+   "per_type": {
+    "long_short": 8,
+    "short_long": 2,
+    "gem_drop": 3,
+    "gem_add": 5,
+    "nas_drop": 4
+   },
+   "confidence_mean": 2.87,
+   "confidence_perceived": 2.86,
+   "confidence_missed": 2.83
+  },
+  "learner_listener": {
+   "edits_perceived": 20,
+   "n_edits": 40,
+   "rate": 0.5,
+   "ci": [
+    0.352,
+    0.648
+   ],
+   "p_vs_chance": 0.5626853438097896,
+   "controls_canonical": 16,
+   "n_controls": 20,
+   "accuracy": 0.6,
+   "per_type": {
+    "long_short": 5,
+    "short_long": 6,
+    "gem_drop": 2,
+    "gem_add": 6,
+    "nas_drop": 1
+   },
+   "confidence_mean": 2.73,
+   "confidence_perceived": 2.75,
+   "confidence_missed": 2.65
+  }
+ },
+ "agreement": {
+  "percent": 0.717,
+  "kappa": 0.406,
+  "edits_both": 15,
+  "edits_either": 27,
+  "edits_both_per_type": {
+   "long_short": 5,
+   "short_long": 2,
+   "gem_drop": 2,
+   "gem_add": 5,
+   "nas_drop": 1
+  },
+  "controls_both_canonical": 15
+ },
+ "factor_by_type": {
+  "long_short": [
+   [
+    0.08,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.08,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.247,
+    [
+     1,
+     1
+    ]
+   ]
+  ],
+  "short_long": [
+   [
+    1.4,
+    [
+     0,
+     1
+    ]
+   ],
+   [
+    1.537,
+    [
+     0,
+     1
+    ]
+   ],
+   [
+    2.029,
+    [
+     0,
+     1
+    ]
+   ],
+   [
+    2.042,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    2.173,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    2.333,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    2.559,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    2.631,
+    [
+     0,
+     1
+    ]
+   ]
+  ],
+  "gem_drop": [
+   [
+    0.444,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.495,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.531,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.598,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.7,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.772,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.8,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.8,
+    [
+     1,
+     1
+    ]
+   ]
+  ],
+  "gem_add": [
+   [
+    1.4,
+    [
+     0,
+     1
+    ]
+   ],
+   [
+    1.4,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    1.51,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    1.673,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    1.696,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    2.306,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    2.547,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    4.0,
+    [
+     1,
+     1
+    ]
+   ]
+  ],
+  "nas_drop": [
+   [
+    0.037,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.041,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.046,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.061,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.064,
+    [
+     1,
+     0
+    ]
+   ],
+   [
+    0.084,
+    [
+     0,
+     0
+    ]
+   ],
+   [
+    0.096,
+    [
+     1,
+     1
+    ]
+   ],
+   [
+    0.1,
+    [
+     1,
+     0
+    ]
+   ]
+  ]
+ },
+ "model_vs_listeners": {
+  "n_clips": 60,
+  "n_validation_speaker_clips": 29,
+  "n_both": 15,
+  "n_neither": 13,
+  "moracheck": {
+   "edit_vs_control": 0.9450000000000001,
+   "native_percept": 0.8437132784958872,
+   "native_percept_ci": [
+    0.721208167989418,
+    0.9412499999999999
+   ],
+   "native_percept_validation_speakers": 0.7979797979797981,
+   "heard_by_both_vs_control": 0.94,
+   "heard_by_neither_vs_control": 0.9461538461538462,
+   "within_edits_native": 0.7803030303030303,
+   "within_edits_native_ci": [
+    0.6188823729219949,
+    0.92
+   ],
+   "within_edits_l2": 0.6124999999999999
+  },
+  "lr": {
+   "edit_vs_control": 0.7949999999999998,
+   "native_percept": 0.7884841363102233,
+   "native_percept_ci": [
+    0.659413115279782,
+    0.8998778998778998
+   ],
+   "native_percept_validation_speakers": 0.7373737373737373,
+   "heard_by_both_vs_control": 0.87,
+   "heard_by_neither_vs_control": 0.6153846153846154,
+   "within_edits_native": 0.7247474747474747,
+   "within_edits_native_ci": [
+    0.5563700918964076,
+    0.8802083333333334
+   ],
+   "within_edits_l2": 0.575,
+   "moracheck_minus_this_ci": [
+    -0.058781250000000076,
+    0.18467741935483856
+   ],
+   "within_edits_moracheck_minus_this_ci": [
+    -0.14246031746031743,
+    0.25324200767263394
+   ]
+  },
+  "gop": {
+   "edit_vs_control": 0.75,
+   "native_percept": 0.7297297297297297,
+   "native_percept_ci": [
+    0.5802252888318357,
+    0.8575034722222222
+   ],
+   "native_percept_validation_speakers": 0.5909090909090908,
+   "heard_by_both_vs_control": 0.7733333333333333,
+   "heard_by_neither_vs_control": 0.6576923076923077,
+   "within_edits_native": 0.6818181818181818,
+   "within_edits_native_ci": [
+    0.5049709079283887,
+    0.8376302083333332
+   ],
+   "within_edits_l2": 0.505,
+   "moracheck_minus_this_ci": [
+    -0.025514187931951142,
+    0.2643948296122208
+   ],
+   "within_edits_moracheck_minus_this_ci": [
+    -0.10418750000000007,
+    0.31001942355889717
+   ]
+  },
+  "rec": {
+   "edit_vs_control": 0.7125,
+   "native_percept": 0.6880141010575792,
+   "native_percept_ci": [
+    0.5705459197235513,
+    0.8020026536330884
+   ],
+   "native_percept_validation_speakers": 0.6616161616161615,
+   "heard_by_both_vs_control": 0.775,
+   "heard_by_neither_vs_control": 0.5903846153846154,
+   "within_edits_native": 0.6287878787878789,
+   "within_edits_native_ci": [
+    0.47916666666666663,
+    0.78125
+   ],
+   "within_edits_l2": 0.625,
+   "moracheck_minus_this_ci": [
+    0.02685714285714291,
+    0.2862003676470588
+   ],
+   "within_edits_moracheck_minus_this_ci": [
+    -0.04512132604237878,
+    0.3390555555555554
+   ]
+  },
+  "dur": {
+   "edit_vs_control": 0.7893750000000002,
+   "native_percept": 0.7303172737955347,
+   "native_percept_ci": [
+    0.5879017857142858,
+    0.864477956254272
+   ],
+   "native_percept_validation_speakers": 0.6818181818181818,
+   "heard_by_both_vs_control": 0.8516666666666668,
+   "heard_by_neither_vs_control": 0.7288461538461539,
+   "within_edits_native": 0.5997474747474747,
+   "within_edits_native_ci": [
+    0.415985101010101,
+    0.7900070332480819
+   ],
+   "within_edits_l2": 0.5125,
+   "moracheck_minus_this_ci": [
+    -0.02743035714285718,
+    0.25227456367162243
+   ],
+   "within_edits_moracheck_minus_this_ci": [
+    -6.250000000000067e-05,
+    0.36618677375256303
+   ]
+  },
+  "moracheck_median": {
+   "control": 0.011715559327664474,
+   "heard_by_both": 0.9982026815414429,
+   "heard_by_neither": 0.8959550460179647
+  }
+ }
+}

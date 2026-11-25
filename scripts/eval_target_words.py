@@ -3,8 +3,12 @@
 Input jsonl, one rated utterance per line:
   wav, text (sentence or word read aloud), target (the rated word, kana or surface form),
   label (1 = judged mispronounced by the expert majority), spk, l1, group (error category)
-Each method scores the target word by the maximum phone score over its phones.
-Usage: eval_target_words.py ITEMS.jsonl OUT.json --ckpt results/runs/X/best.pt [--baselines]
+  optional: C and target_phones instead of text and target; native (1 for native control speakers);
+  rating_mean (1 to 5, D set)
+Each method scores the target word by the maximum phone score over its phones. With --mean KEY the
+mean of the checkpoint scores is stored under KEY (the three-seed MoraCheck score of the protocol).
+Usage: eval_target_words.py ITEMS.jsonl OUT.json --ckpt results/runs/X/last.pt [--mean moracheck] [--baselines]
+DEVICE=cpu runs without the GPU.
 """
 import argparse, json, os, sys
 import numpy as np
@@ -32,8 +36,8 @@ def locate(C, W):
 
 def prepare(items):
     for it in items:
-        C = [p for p in g2p(it["text"]) if p != "pau"]
-        W = [p for p in g2p(it["target"]) if p != "pau"]
+        C = it["C"] if "C" in it else [p for p in g2p(it["text"]) if p != "pau"]
+        W = it["target_phones"] if "target_phones" in it else [p for p in g2p(it["target"]) if p != "pau"]
         it["C"] = C
         it["tidx"] = locate(C, W)
         it.setdefault("labels", [0] * len(C))
@@ -50,10 +54,16 @@ def main():
     ap.add_argument("--ckpt", action="append", default=[])
     ap.add_argument("--encoder", default="models/japanese-hubert-base")
     ap.add_argument("--baselines", action="store_true")
+    ap.add_argument("--mean", default=None)
     a = ap.parse_args()
+    dev = os.environ.get("DEVICE", "cuda")
+    if dev == "cpu":
+        torch.set_num_threads(6)
     items = prepare([json.loads(l) for l in open(a.items, encoding="utf-8")])
     res = {"n": len(items), "label": [it["label"] for it in items], "spk": [it.get("spk") for it in items],
-           "group": [it.get("group") for it in items], "l1": [it.get("l1") for it in items], "scores": {}}
+           "group": [it.get("group") for it in items], "l1": [it.get("l1") for it in items],
+           "native": [int(it.get("native", 0)) for it in items], "rating_mean": [it.get("rating_mean") for it in items],
+           "scores": {}}
     from train_detector import predict
     import train_v2
     from model_v2 import DetectorV2
@@ -61,18 +71,20 @@ def main():
         args = json.load(open(os.path.join(os.path.dirname(ck), "args.json")))
         if "no_lr" in args:
             model = DetectorV2(use_lr=not args["no_lr"], use_dur=not args["no_dur"], use_seg=not args["no_seg"],
-                               use_xattn=not args["no_xattn"]).cuda()
-            model.load_state_dict(torch.load(ck, map_location="cuda"), strict=False)
-            probs = train_v2.predict(model, FixedSet(items))
+                               use_xattn=not args["no_xattn"]).to(dev)
+            model.load_state_dict(torch.load(ck, map_location=dev), strict=False)
+            probs = train_v2.predict(model, FixedSet(items), device=dev)
         else:
-            model = Detector(args.get("encoder", a.encoder), finetune_top=args.get("finetune_top", 0)).cuda()
-            model.load_state_dict(torch.load(ck, map_location="cuda"), strict=False)
-            probs = predict(model, FixedSet(items))
+            model = Detector(args.get("encoder", a.encoder), finetune_top=args.get("finetune_top", 0)).to(dev)
+            model.load_state_dict(torch.load(ck, map_location=dev), strict=False)
+            probs = predict(model, FixedSet(items), device=dev)
         res["scores"][ck] = word_scores(items, probs)
         del model; torch.cuda.empty_cache()
+    if a.mean:
+        res["scores"][a.mean] = np.mean([res["scores"][ck] for ck in a.ckpt], axis=0).tolist()
     if a.baselines:
         from baselines import run
-        for m, ps in run(items).items():
+        for m, ps in run(items, device=dev).items():
             res["scores"][m] = word_scores(items, ps)
     from sklearn.metrics import roc_auc_score
     y = np.array(res["label"])
